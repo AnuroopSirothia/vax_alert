@@ -45,6 +45,8 @@ public class SlotFinder {
 	@Autowired
 	private ApplicationContext context;
 
+	private int apiCallCount;
+
 	/**
 	 * Slots can be checked 100 times/5 min/IP address. Which means we can check slot 20 times in a minute
 	 * which translates to checking slot every 3000 ms.
@@ -78,6 +80,9 @@ public class SlotFinder {
 		districtList.add(bbmpSessionList);
 
 		findFreeSlots(districtList);
+		
+		apiCallCount = apiCallCount + 3;
+		log.info("API Call Count = " + apiCallCount);
 	}
 
 	/**
