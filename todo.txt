@@ -1,0 +1,6 @@
+Must have:-
+Program plays a music.
+Test that the program run while other user is logged in.
+
+Good to have:-
+Program should auto-start after laptop starts.
