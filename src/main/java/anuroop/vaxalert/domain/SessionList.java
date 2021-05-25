@@ -13,6 +13,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * Session list represents all the available centers where vaccine may be available in a given district.
+ * Session list is nothing but a district.
+ * 
+ * @author anuroop
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
 	"sessions"

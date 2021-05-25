@@ -1,6 +1,11 @@
 Must have:-
+Find slots for Bangalore Urban, Rural and BBMP
+Find slots for next 7 days
 Program plays a music.
+Test that when slots are available it will alert.
 Test that the program run while other user is logged in.
 
 Good to have:-
 Program should auto-start after laptop starts.
+Make the program configuration so that it can find slots based on a given district.
+Dose 1 or 2 should be configurable. Right now Dose 1 is hard coded. In the sense it will only alert for Dose 1.

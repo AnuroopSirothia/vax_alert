@@ -1,6 +1,9 @@
 package anuroop.vaxalert;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +32,26 @@ public class SlotFinder {
 
 	private static final Logger log = LoggerFactory.getLogger(SlotFinder.class);
 
+	private String bangalore_urban_distric_id = "265";
+	private String bangalore_rural_distric_id = "276";
+	private String bbmp_distric_id = "294";
+
+	private String date = "26-05-2021";
+
+	private String bangalore_urban_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_urban_distric_id  + "&date=" + date ;
+	private String bangalore_rural_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_rural_distric_id  + "&date=" + date ;
+	private String bbmp_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bbmp_distric_id  + "&date=" + date ;
+
 	@Autowired
 	private ApplicationContext context;
 
-	@Scheduled(fixedRate = 5000)
-	public void reportCurrentTime() {
-
-
+	/**
+	 * Slots can be checked 100 times/5 min/IP address. Which means we can check slot 20 times in a minute
+	 * which translates to checking slot every 3000 ms.
+	 * @throws InterruptedException 
+	 */
+	@Scheduled(fixedRate = 3100)
+	public void fetchSlotInfo() throws InterruptedException {
 		// Setting HTTP Header is needed to avoid 403 Forbidden error.
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -43,26 +59,59 @@ public class SlotFinder {
 		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
 
 		RestTemplate restTemplate = context.getBean(RestTemplate.class);
-		ResponseEntity<SessionList> sessionListtResponse = restTemplate.exchange("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=265&date=26-05-2021",HttpMethod.GET, entity, SessionList.class);
-		SessionList sessionList = sessionListtResponse.getBody();
 
-		for(Session session : sessionList.getSessions()) {
+		List<SessionList> districtList = new ArrayList<SessionList>();
 
-			if(session.getMinAgeLimit() < 45) {
-				log.info("---------------");
-				log.info(session.getAddress());
-				log.info(session.getName());
+		ResponseEntity<SessionList> bangaloreUrbanResponse = restTemplate.exchange(bangalore_urban_district_url,HttpMethod.GET, entity, SessionList.class);
+		SessionList bangaloreUrbanSessionList = bangaloreUrbanResponse.getBody();
 
-				log.info(session.getDate());
+		TimeUnit.MILLISECONDS.sleep(3000);
+		ResponseEntity<SessionList> bangaloreRuralResponse = restTemplate.exchange(bangalore_rural_district_url,HttpMethod.GET, entity, SessionList.class);
+		SessionList bangaloreRuralSessionList = bangaloreRuralResponse.getBody();
+		
+		TimeUnit.MILLISECONDS.sleep(3000);
+		ResponseEntity<SessionList> bbmpResponse = restTemplate.exchange(bbmp_district_url,HttpMethod.GET, entity, SessionList.class);
+		SessionList bbmpSessionList = bbmpResponse.getBody();
 
-				log.info(session.getAvailableCapacity().toString());
-				log.info(session.getAvailableCapacityDose1().toString());
-				log.info(session.getAvailableCapacityDose2().toString());
+		districtList.add(bangaloreUrbanSessionList);
+		districtList.add(bangaloreRuralSessionList);
+		districtList.add(bbmpSessionList);
 
-				log.info(session.getMinAgeLimit().toString());
-				log.info(session.getSlots().toString());
+		findFreeSlots(districtList);
+	}
 
-				log.info("\n");
+	/**
+	 * Find free slots in all the given districts.
+	 * 
+	 * @param districtList
+	 */
+	private void findFreeSlots(List<SessionList> districtList) {
+
+		for(SessionList sessionList : districtList) {
+
+			for(Session session : sessionList.getSessions()) {
+
+				if(session.getMinAgeLimit() < 45) {
+					if(session.getAvailableCapacityDose1() > 0) {
+						log.info("----- ALERT: Slot found! -----");
+						
+						log.info("Address: " + session.getAddress());
+						log.info("Name: " + session.getName());
+
+						log.info("Date: " + session.getDate());
+						log.info("From: " + session.getFrom());
+						log.info("To: " + session.getTo());
+
+						log.info("Available Capacity: " + session.getAvailableCapacity().toString());
+						log.info("Dose 1 Capacity: " + session.getAvailableCapacityDose1().toString());
+
+						log.info("Age Limit: " + session.getMinAgeLimit().toString());
+						log.info("Slots: " + session.getSlots().toString());
+
+						log.info("\n");
+
+					}
+				}
 			}
 		}
 	}
