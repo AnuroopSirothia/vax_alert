@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import anuroop.vaxalert.domain.State;
 import anuroop.vaxalert.domain.StateList;
 
 @SpringBootApplication
@@ -42,9 +43,12 @@ public class AppointmentAvailability {
             HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
 			
             
-            ResponseEntity<StateList> stateList = restTemplate.exchange("https://cdn-api.co-vin.in/api/v2/admin/location/states",HttpMethod.GET, entity, StateList.class);
+            ResponseEntity<StateList> stateListResponse = restTemplate.exchange("https://cdn-api.co-vin.in/api/v2/admin/location/states",HttpMethod.GET, entity, StateList.class);
+            StateList stateList = stateListResponse.getBody();
 
-			log.info(stateList.toString());
+			for(State state : stateList.getStates()) {
+				log.info(state.getStateName());
+			}
 			
 		};
 	}
