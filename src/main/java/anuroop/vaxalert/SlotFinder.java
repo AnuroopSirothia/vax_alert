@@ -1,5 +1,7 @@
 package anuroop.vaxalert;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,11 +39,13 @@ public class SlotFinder {
 	private String bangalore_rural_distric_id = "276";
 	private String bbmp_distric_id = "294";
 
-	private String date = "27-05-2021";
+	private String date = getTodaysDate();
 
 	private String bangalore_urban_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_urban_distric_id  + "&date=" + date ;
 	private String bangalore_rural_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_rural_distric_id  + "&date=" + date ;
 	private String bbmp_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bbmp_distric_id  + "&date=" + date ;
+	
+	private String calendarByDistrict = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=" + bbmp_distric_id +"&date=" + date;
 
 	@Autowired
 	private ApplicationContext context;
@@ -55,6 +59,23 @@ public class SlotFinder {
 	 */
 	@Scheduled(fixedRate = 1)
 	public void fetchSlotInfo() throws InterruptedException {
+		findSessionsForToday();
+		findSessionsForNext7Days();
+	}
+
+	private void findSessionsForNext7Days() {
+
+		List<String> districtUrlList = new ArrayList<String>();
+		districtUrlList.add(calendarByDistrict);
+		
+		List<SessionList> allSessionsList = getAllDistrictsSessionList(calendarByDistrict);
+
+		findFreeSlots(allSessionsList);
+	
+	}
+
+	private void findSessionsForToday() throws InterruptedException {
+
 		List<String> districtUrlList = new ArrayList<String>();
 		districtUrlList.add(bangalore_urban_district_url);
 		districtUrlList.add(bbmp_district_url);
@@ -62,6 +83,14 @@ public class SlotFinder {
 		List<SessionList> allSessionsList = getAllDistrictsSessionList(districtUrlList);
 
 		findFreeSlots(allSessionsList);
+	
+	}
+
+	private String getTodaysDate() {
+		   DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
+		   LocalDateTime now = LocalDateTime.now();
+		   String date = dtf.format(now);
+		   return date; 
 	}
 
 	private List<SessionList> getAllDistrictsSessionList(List<String> districtUrlList) throws InterruptedException {
