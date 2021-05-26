@@ -93,12 +93,12 @@ public class SlotFinder {
 	 */
 	private void findFreeSlots(List<SessionList> districtList) {
 
-		for(SessionList sessionList : districtList) {
+		for(SessionList district : districtList) {
 
-			for(Session session : sessionList.getSessions()) {
+			for(Session session : district.getSessions()) {
 
 				if(session.getMinAgeLimit() < 45) {
-					if(session.getAvailableCapacityDose1() > 0) {
+					if(session.getAvailableCapacityDose1() > 1) {
 						log.info("----- ALERT: Slot found! -----");
 						
 						SoundUtils.main(null);
@@ -110,8 +110,6 @@ public class SlotFinder {
 						log.info("Date: " + session.getDate());
 
 						log.info("Dose 1 Capacity: " + session.getAvailableCapacityDose1().toString());
-
-						log.info("Slots: " + session.getSlots().toString());
 
 						log.info("\n");
 
