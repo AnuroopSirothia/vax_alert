@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -52,38 +53,59 @@ public class SlotFinder {
 	 * which translates to checking slot every 3000 ms.
 	 * @throws InterruptedException 
 	 */
-	@Scheduled(fixedRate = 4000)
+	@Scheduled(fixedRate = 1)
 	public void fetchSlotInfo() throws InterruptedException {
-		// Setting HTTP Header is needed to avoid 403 Forbidden error.
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
-		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+		List<String> districtUrlList = new ArrayList<String>();
+		districtUrlList.add(bangalore_urban_district_url);
+		districtUrlList.add(bbmp_district_url);
+		
+		List<SessionList> allSessionsList = getAllDistrictsSessionList(districtUrlList);
 
+		findFreeSlots(allSessionsList);
+	}
+
+	private List<SessionList> getAllDistrictsSessionList(List<String> districtUrlList) throws InterruptedException {
+		
+		List<SessionList> allDistrictsSessionList = new ArrayList<SessionList>();
+		
+		for(String districtUrl : districtUrlList) {
+			// Setting HTTP Header is needed to avoid 403 Forbidden error.
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+			HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+			
+			ResponseEntity<SessionList> response = executeHTTPMethod(districtUrl, HttpMethod.GET, entity, SessionList.class);
+			SessionList districtSessionList = response.getBody();
+			allDistrictsSessionList.add(districtSessionList);
+		}
+		
+		return allDistrictsSessionList;
+	}
+
+	/**
+	 * Call this method rather than directly calling RestClient method because we don't want to exeed API limit. This method
+	 * takes care of sleeping for configured time after each API call.
+	 * 
+	 * @param <T>
+	 * @param url
+	 * @param method
+	 * @param requestEntity
+	 * @param responseType
+	 * @param uriVariables
+	 * @return
+	 * @throws InterruptedException
+	 */
+	private <T> ResponseEntity<T> executeHTTPMethod(String url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables) throws InterruptedException {
 		RestTemplate restTemplate = context.getBean(RestTemplate.class);
-
-		List<SessionList> districtList = new ArrayList<SessionList>();
-
-		ResponseEntity<SessionList> bangaloreUrbanResponse = restTemplate.exchange(bangalore_urban_district_url,HttpMethod.GET, entity, SessionList.class);
-		SessionList bangaloreUrbanSessionList = bangaloreUrbanResponse.getBody();
-
-		// There no slots found in Bangalore Rural. Hence to save API calls not checking Bangalore Rural for sometime.
-//		TimeUnit.MILLISECONDS.sleep(3000);
-//		ResponseEntity<SessionList> bangaloreRuralResponse = restTemplate.exchange(bangalore_rural_district_url,HttpMethod.GET, entity, SessionList.class);
-//		SessionList bangaloreRuralSessionList = bangaloreRuralResponse.getBody();
-		
-		TimeUnit.MILLISECONDS.sleep(4000);
-		ResponseEntity<SessionList> bbmpResponse = restTemplate.exchange(bbmp_district_url,HttpMethod.GET, entity, SessionList.class);
-		SessionList bbmpSessionList = bbmpResponse.getBody();
-
-		districtList.add(bangaloreUrbanSessionList);
-//		districtList.add(bangaloreRuralSessionList);
-		districtList.add(bbmpSessionList);
-
-		findFreeSlots(districtList);
-		
-		apiCallCount = apiCallCount + 2;
+		ResponseEntity<T> response = restTemplate.exchange(url, method, requestEntity, responseType, uriVariables);
+		apiCallCount++;
 		log.debug("API Call Count = " + apiCallCount);
+		
+		// There is a limit of 100 API calls/minute/IP address. Hence sleeping for 5 seconds between API calls.
+		TimeUnit.MILLISECONDS.sleep(5000);
+		return response;
 	}
 
 	/**
@@ -94,6 +116,9 @@ public class SlotFinder {
 	private void findFreeSlots(List<SessionList> districtList) {
 
 		for(SessionList district : districtList) {
+			
+			log.debug("Finding slot in district: " + district.getSessions().get(0).getDistrictName());
+			
 			for(Session session : district.getSessions()) {
 
 				if(session.getMinAgeLimit() < 45) {
