@@ -72,7 +72,7 @@ public class SlotFinder {
 //		ResponseEntity<SessionList> bangaloreRuralResponse = restTemplate.exchange(bangalore_rural_district_url,HttpMethod.GET, entity, SessionList.class);
 //		SessionList bangaloreRuralSessionList = bangaloreRuralResponse.getBody();
 		
-		TimeUnit.MILLISECONDS.sleep(3000);
+		TimeUnit.MILLISECONDS.sleep(4000);
 		ResponseEntity<SessionList> bbmpResponse = restTemplate.exchange(bbmp_district_url,HttpMethod.GET, entity, SessionList.class);
 		SessionList bbmpSessionList = bbmpResponse.getBody();
 
@@ -94,7 +94,6 @@ public class SlotFinder {
 	private void findFreeSlots(List<SessionList> districtList) {
 
 		for(SessionList district : districtList) {
-
 			for(Session session : district.getSessions()) {
 
 				if(session.getMinAgeLimit() < 45) {
