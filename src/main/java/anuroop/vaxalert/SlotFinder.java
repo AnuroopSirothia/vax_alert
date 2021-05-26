@@ -1,5 +1,6 @@
 package anuroop.vaxalert;
 
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,7 @@ public class SlotFinder {
 	 * which translates to checking slot every 3000 ms.
 	 * @throws InterruptedException 
 	 */
-	@Scheduled(fixedRate = 5000)
+	@Scheduled(fixedRate = 10000)
 	public void fetchSlotInfo() throws InterruptedException {
 		// Setting HTTP Header is needed to avoid 403 Forbidden error.
 		HttpHeaders headers = new HttpHeaders();
@@ -99,6 +100,8 @@ public class SlotFinder {
 				if(session.getMinAgeLimit() < 45) {
 					if(session.getAvailableCapacityDose1() > 0) {
 						log.info("----- ALERT: Slot found! -----");
+						
+						Toolkit.getDefaultToolkit().beep();
 						
 						log.info("Address: " + session.getDistrictName());
 						log.info("Address: " + session.getAddress());
