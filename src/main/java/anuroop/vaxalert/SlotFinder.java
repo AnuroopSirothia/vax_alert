@@ -98,23 +98,19 @@ public class SlotFinder {
 			for(Session session : sessionList.getSessions()) {
 
 				if(session.getMinAgeLimit() < 45) {
-					if(session.getAvailableCapacityDose1() > 0) {
+					if(session.getAvailableCapacityDose1() > 1) {
 						log.info("----- ALERT: Slot found! -----");
 						
 						Toolkit.getDefaultToolkit().beep();
 						
-						log.info("Address: " + session.getDistrictName());
+						log.info("District: " + session.getDistrictName());
 						log.info("Address: " + session.getAddress());
 						log.info("Name: " + session.getName());
 
 						log.info("Date: " + session.getDate());
-						log.info("From: " + session.getFrom());
-						log.info("To: " + session.getTo());
 
-						log.info("Available Capacity: " + session.getAvailableCapacity().toString());
 						log.info("Dose 1 Capacity: " + session.getAvailableCapacityDose1().toString());
 
-						log.info("Age Limit: " + session.getMinAgeLimit().toString());
 						log.info("Slots: " + session.getSlots().toString());
 
 						log.info("\n");
