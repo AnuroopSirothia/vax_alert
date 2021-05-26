@@ -52,7 +52,7 @@ public class SlotFinder {
 	 * which translates to checking slot every 3000 ms.
 	 * @throws InterruptedException 
 	 */
-	@Scheduled(fixedRate = 3100)
+	@Scheduled(fixedRate = 5000)
 	public void fetchSlotInfo() throws InterruptedException {
 		// Setting HTTP Header is needed to avoid 403 Forbidden error.
 		HttpHeaders headers = new HttpHeaders();
@@ -100,6 +100,7 @@ public class SlotFinder {
 					if(session.getAvailableCapacityDose1() > 0) {
 						log.info("----- ALERT: Slot found! -----");
 						
+						log.info("Address: " + session.getDistrictName());
 						log.info("Address: " + session.getAddress());
 						log.info("Name: " + session.getName());
 
