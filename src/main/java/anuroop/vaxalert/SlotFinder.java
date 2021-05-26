@@ -1,6 +1,5 @@
 package anuroop.vaxalert;
 
-import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +36,7 @@ public class SlotFinder {
 	private String bangalore_rural_distric_id = "276";
 	private String bbmp_distric_id = "294";
 
-	private String date = "26-05-2021";
+	private String date = "27-05-2021";
 
 	private String bangalore_urban_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_urban_distric_id  + "&date=" + date ;
 	private String bangalore_rural_district_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=" + bangalore_rural_distric_id  + "&date=" + date ;
@@ -83,7 +82,7 @@ public class SlotFinder {
 
 		findFreeSlots(districtList);
 		
-		apiCallCount = apiCallCount + 3;
+		apiCallCount = apiCallCount + 2;
 		log.debug("API Call Count = " + apiCallCount);
 	}
 
@@ -99,10 +98,10 @@ public class SlotFinder {
 			for(Session session : sessionList.getSessions()) {
 
 				if(session.getMinAgeLimit() < 45) {
-					if(session.getAvailableCapacityDose1() > 1) {
+					if(session.getAvailableCapacityDose1() > 0) {
 						log.info("----- ALERT: Slot found! -----");
 						
-						Toolkit.getDefaultToolkit().beep();
+						SoundUtils.main(null);
 						
 						log.info("District: " + session.getDistrictName());
 						log.info("Address: " + session.getAddress());
