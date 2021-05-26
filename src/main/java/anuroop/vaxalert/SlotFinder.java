@@ -52,7 +52,7 @@ public class SlotFinder {
 	 * which translates to checking slot every 3000 ms.
 	 * @throws InterruptedException 
 	 */
-	@Scheduled(fixedRate = 10000)
+	@Scheduled(fixedRate = 4000)
 	public void fetchSlotInfo() throws InterruptedException {
 		// Setting HTTP Header is needed to avoid 403 Forbidden error.
 		HttpHeaders headers = new HttpHeaders();

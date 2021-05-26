@@ -4,11 +4,11 @@ Must have:-
 
 	Find slots for next 7 days
 
-	Program plays a music.
+	DONE: Program plays a music.
 
 	DONE: - Test that when slots are available it will alert.
 
-	Test that the program run while other user is logged in.
+	DONE:- Test that the program run while other user is logged in. Sound does not play.
 
 Good to have:-
 	Program should auto-start after laptop starts.
