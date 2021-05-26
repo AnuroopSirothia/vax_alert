@@ -68,22 +68,23 @@ public class SlotFinder {
 		ResponseEntity<SessionList> bangaloreUrbanResponse = restTemplate.exchange(bangalore_urban_district_url,HttpMethod.GET, entity, SessionList.class);
 		SessionList bangaloreUrbanSessionList = bangaloreUrbanResponse.getBody();
 
-		TimeUnit.MILLISECONDS.sleep(3000);
-		ResponseEntity<SessionList> bangaloreRuralResponse = restTemplate.exchange(bangalore_rural_district_url,HttpMethod.GET, entity, SessionList.class);
-		SessionList bangaloreRuralSessionList = bangaloreRuralResponse.getBody();
+		// There no slots found in Bangalore Rural. Hence to save API calls not checking Bangalore Rural for sometime.
+//		TimeUnit.MILLISECONDS.sleep(3000);
+//		ResponseEntity<SessionList> bangaloreRuralResponse = restTemplate.exchange(bangalore_rural_district_url,HttpMethod.GET, entity, SessionList.class);
+//		SessionList bangaloreRuralSessionList = bangaloreRuralResponse.getBody();
 		
 		TimeUnit.MILLISECONDS.sleep(3000);
 		ResponseEntity<SessionList> bbmpResponse = restTemplate.exchange(bbmp_district_url,HttpMethod.GET, entity, SessionList.class);
 		SessionList bbmpSessionList = bbmpResponse.getBody();
 
 		districtList.add(bangaloreUrbanSessionList);
-		districtList.add(bangaloreRuralSessionList);
+//		districtList.add(bangaloreRuralSessionList);
 		districtList.add(bbmpSessionList);
 
 		findFreeSlots(districtList);
 		
 		apiCallCount = apiCallCount + 3;
-		log.info("API Call Count = " + apiCallCount);
+		log.debug("API Call Count = " + apiCallCount);
 	}
 
 	/**
